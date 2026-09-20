@@ -121,7 +121,6 @@ export default function SellersPage() {
                 seller.isBlocked ? "opacity-70" : ""
               }`}
             >
-              <div className="h-1.5 w-full bg-gradient-to-r from-blue-500 to-indigo-600" />
               <div className="p-5">
                 <div className="flex items-start gap-4">
                   <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-lg font-extrabold shrink-0 overflow-hidden">
