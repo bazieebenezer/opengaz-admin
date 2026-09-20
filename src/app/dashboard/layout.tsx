@@ -12,7 +12,12 @@ import {
   Menu,
   X,
   Sun,
-  Moon
+  Moon,
+  ClipboardCheck,
+  Flame,
+  Star,
+  Truck,
+  Store
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -82,8 +87,13 @@ export default function DashboardLayout({
 
   const menuItems = [
     { label: "Dashboard", icon: LayoutDashboard, href: "/dashboard" },
-    { label: "Validations", icon: Users, href: "/dashboard/validations" },
+    { label: "Validations", icon: ClipboardCheck, href: "/dashboard/validations" },
     { label: "Commandes", icon: ShoppingBag, href: "/dashboard/orders" },
+    { label: "Utilisateurs", icon: Users, href: "/dashboard/users" },
+    { label: "Produits & Gaz", icon: Flame, href: "/dashboard/products" },
+    { label: "Revendeurs", icon: Store, href: "/dashboard/sellers" },
+    { label: "Livraisons", icon: Truck, href: "/dashboard/deliveries" },
+    { label: "Avis", icon: Star, href: "/dashboard/reviews" },
     { label: "Paramètres", icon: Settings, href: "/dashboard/settings" },
   ];
 
