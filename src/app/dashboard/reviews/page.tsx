@@ -110,7 +110,7 @@ export default function ReviewsPage() {
             <div key={review.id} className="bg-white dark:bg-gray-900 p-5 rounded-xl border border-neutral-200 dark:border-gray-800">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center font-semibold text-sm shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 flex items-center justify-center font-semibold text-sm leading-none shrink-0">
                     {(review.consumer.name || review.consumer.email).charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0">
