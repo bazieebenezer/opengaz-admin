@@ -158,7 +158,7 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Produits & Gaz</h1>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Produits et gaz</h1>
           <p className="text-gray-500 dark:text-gray-400">Catégories de gaz et stocks disponible</p>
         </div>
 
@@ -195,16 +195,18 @@ export default function ProductsPage() {
                 </button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ID (ex: sodigaz-6)</label>
-                  <input
-                    value={form.id}
-                    onChange={(e) => setForm({ ...form, id: e.target.value })}
-                    disabled={!!editingId}
-                    required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none disabled:opacity-50"
-                  />
-                </div>
+                {!editingId && (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">ID (ex: sodigaz-6)</label>
+                    <input
+                      value={form.id}
+                      onChange={(e) => setForm({ ...form, id: e.target.value })}
+                      disabled={!!editingId}
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none disabled:opacity-50"
+                    />
+                  </div>
+                )}
                 <div>
                   <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Nom</label>
                   <input
@@ -245,15 +247,17 @@ export default function ProductsPage() {
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none"
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">URL image</label>
-                  <input
-                    value={form.imageUrl}
-                    onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none"
-                  />
-                </div>
+                {!editingId && (
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">URL image</label>
+                    <input
+                      value={form.imageUrl}
+                      onChange={(e) => setForm({ ...form, imageUrl: e.target.value })}
+                      placeholder="https://..."
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-sm bg-transparent text-gray-900 dark:text-white focus:ring-1 focus:ring-blue-500 outline-none"
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => setShowForm(false)} className="px-4 py-2 rounded-lg text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">

@@ -90,7 +90,7 @@ export default function DashboardLayout({
     { label: "Validations", icon: ClipboardCheck, href: "/dashboard/validations" },
     { label: "Commandes", icon: ShoppingBag, href: "/dashboard/orders" },
     { label: "Utilisateurs", icon: Users, href: "/dashboard/users" },
-    { label: "Produits & Gaz", icon: Flame, href: "/dashboard/products" },
+    { label: "Produits et gaz", icon: Flame, href: "/dashboard/products" },
     { label: "Revendeurs", icon: Store, href: "/dashboard/sellers" },
     { label: "Livraisons", icon: Truck, href: "/dashboard/deliveries" },
     { label: "Avis", icon: Star, href: "/dashboard/reviews" },
