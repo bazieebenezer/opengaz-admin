@@ -4,24 +4,20 @@ import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
   Legend,
-  Filler,
 } from 'chart.js';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  PointElement,
-  LineElement,
+  BarElement,
   Title,
   Tooltip,
-  Legend,
-  Filler
+  Legend
 );
 
 interface ChartData {
@@ -40,10 +36,10 @@ export function SalesChart({ data }: SalesChartProps) {
       {
         label: 'Ventes (F)',
         data: data.map((item) => item.value),
-        borderColor: '#2563eb',
-        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-        tension: 0.4,
-        fill: true,
+        backgroundColor: '#2563eb',
+        hoverBackgroundColor: '#1d4ed8',
+        borderRadius: 6,
+        maxBarThickness: 48,
       },
     ],
   };
@@ -74,12 +70,13 @@ export function SalesChart({ data }: SalesChartProps) {
         },
       },
       y: {
+        beginAtZero: true,
         grid: {
           color: '#e5e7eb',
         },
         ticks: {
           color: '#9ca3af',
-          callback: (value: any) => `${value}F`,
+          callback: (value: string | number) => `${value} F`,
         },
       },
     },
@@ -87,7 +84,7 @@ export function SalesChart({ data }: SalesChartProps) {
 
   return (
     <div className="relative w-full h-full">
-      <Line data={chartData} options={options} />
+      <Bar data={chartData} options={options} />
     </div>
   );
 }

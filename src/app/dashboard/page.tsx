@@ -9,10 +9,22 @@ import { Pie } from 'react-chartjs-2';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+interface StatSummary {
+  totalRevenue: number;
+  totalOrders: number;
+  totalUsers: number;
+  pendingValidations: number;
+}
+
+interface TrendPoint {
+  name: string;
+  value: number;
+}
+
 export default function DashboardPage() {
-  const [stats, setStats] = useState<any>(null);
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [roleData, setRoleData] = useState<any[]>([]);
+  const [stats, setStats] = useState<StatSummary | null>(null);
+  const [chartData, setChartData] = useState<TrendPoint[]>([]);
+  const [roleData, setRoleData] = useState<TrendPoint[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const roleLabels: Record<string, string> = {

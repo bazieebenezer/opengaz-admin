@@ -1,16 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  CheckCircle2, 
-  XCircle, 
-  User, 
-  Store, 
-  Truck, 
+import {
+  CheckCircle2,
+  XCircle,
+  Store,
+  Truck,
   Eye,
-  EyeOff, 
+  EyeOff,
   Loader2,
-  Calendar,
   Phone,
   MapPin
 } from "lucide-react";
@@ -24,12 +22,34 @@ const roleLabels: Record<string, string> = {
   ADMIN: "ADMINISTRATEUR",
 };
 
+interface PendingUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  createdAt: string;
+  phone?: string;
+  address?: string;
+  cnibRecto?: string;
+  cnibVerso?: string;
+  shopImage?: string;
+  shopName?: string;
+}
+
+interface ValidatedUser {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  temporaryPassword: string;
+}
+
 export default function ValidationsPage() {
-  const [users, setUsers] = useState<any[]>([]);
-  const [validatedUsers, setValidatedUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<PendingUser[]>([]);
+  const [validatedUsers, setValidatedUsers] = useState<ValidatedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState<string | null>(null);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
+  const [selectedUser, setSelectedUser] = useState<PendingUser | null>(null);
   const [visiblePasswords, setVisiblePasswords] = useState<Record<string, boolean>>({});
 
   const fetchUsers = async () => {
@@ -48,7 +68,25 @@ export default function ValidationsPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
+    let active = true;
+    (async () => {
+      try {
+        const [pendingRes, validatedRes] = await Promise.all([
+          api.get("/admin/pending-users"),
+          api.get("/admin/validated-delivery-partners")
+        ]);
+        if (!active) return;
+        setUsers(pendingRes.data);
+        setValidatedUsers(validatedRes.data);
+      } catch (error) {
+        console.error("Failed to fetch users", error);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleAction = async (id: string, action: 'APPROVE' | 'REJECT') => {
@@ -58,7 +96,7 @@ export default function ValidationsPage() {
       toast.success(`Utilisateur ${action === 'APPROVE' ? 'validé' : 'rejeté'} avec succès.`);
       await fetchUsers(); // Refresh both lists
       if (selectedUser?.id === id) setSelectedUser(null);
-    } catch (error) {
+    } catch {
       toast.error("Une erreur est survenue lors du traitement.");
     } finally {
       setProcessingId(null);

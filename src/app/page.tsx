@@ -29,8 +29,9 @@ export default function LoginPage() {
       localStorage.setItem("adminToken", response.data.token);
       localStorage.setItem("adminUser", JSON.stringify(response.data.user));
       router.push("/dashboard");
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Une erreur est survenue lors de la connexion.");
+    } catch (err) {
+      const error = err as { response?: { data?: { message?: string } } };
+      setError(error.response?.data?.message || "Une erreur est survenue lors de la connexion.");
     } finally {
       setIsLoading(false);
     }

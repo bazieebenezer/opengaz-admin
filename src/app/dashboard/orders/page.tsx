@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
-import { Loader2, Search, Filter } from "lucide-react";
+import { Loader2, Filter } from "lucide-react";
 
 const statusLabels: Record<string, string> = {
   PENDING: "En attente",
@@ -22,26 +22,38 @@ const statusColors: Record<string, string> = {
   CANCELLED: "bg-red-100 text-red-800 dark:bg-red-950/40 dark:text-red-300",
 };
 
+interface Order {
+  id: string;
+  consumer: { name?: string } | null;
+  seller: { shopName?: string } | null;
+  createdAt: string;
+  totalAmount: number;
+  status: string;
+}
+
 export default function OrdersPage() {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("");
 
   useEffect(() => {
-    fetchOrders();
+    let active = true;
+    (async () => {
+      setIsLoading(true);
+      try {
+        const response = await api.get(`/admin/orders${statusFilter ? `?status=${statusFilter}` : ""}`);
+        if (!active) return;
+        setOrders(response.data);
+      } catch (error) {
+        console.error("Failed to fetch orders", error);
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
   }, [statusFilter]);
-
-  const fetchOrders = async () => {
-    setIsLoading(true);
-    try {
-      const response = await api.get(`/admin/orders${statusFilter ? `?status=${statusFilter}` : ""}`);
-      setOrders(response.data);
-    } catch (error) {
-      console.error("Failed to fetch orders", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -94,7 +106,7 @@ export default function OrdersPage() {
                 <td colSpan={5} className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">Aucune commande trouvée.</td>
               </tr>
             ) : (
-              orders.map((order: any) => (
+              orders.map((order) => (
                 <tr key={order.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">{order.consumer?.name || 'N/A'}</td>
                   <td className="px-6 py-4 text-gray-600 dark:text-gray-300">{order.seller?.shopName || 'N/A'}</td>

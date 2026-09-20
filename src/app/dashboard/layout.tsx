@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { 
-  LayoutDashboard, 
-  Users, 
-  ShoppingBag, 
-  Settings, 
-  LogOut, 
+import {
+  LayoutDashboard,
+  Users,
+  ShoppingBag,
+  Settings,
+  LogOut,
   ChevronRight,
   Menu,
   X,
@@ -22,9 +22,18 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [adminUser, setAdminUser] = useState<any>(null);
+  const [adminUser, setAdminUser] = useState<{ name?: string; email?: string } | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = localStorage.getItem("adminUser");
+    return stored ? JSON.parse(stored) : null;
+  });
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window === "undefined") return "light";
+    const saved = localStorage.getItem("theme") as "light" | "dark" | null;
+    if (saved) return saved;
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  });
   const router = useRouter();
   const pathname = usePathname();
 
@@ -32,9 +41,6 @@ export default function DashboardLayout({
     const token = localStorage.getItem("adminToken");
     if (!token) {
       router.push("/");
-    } else {
-      const user = localStorage.getItem("adminUser");
-      if (user) setAdminUser(JSON.parse(user));
     }
   }, [router]);
 
@@ -54,22 +60,8 @@ export default function DashboardLayout({
   }, []);
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem("theme") as "light" | "dark" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-      if (savedTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    } else {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      setTheme(systemTheme);
-      if (systemTheme === "dark") {
-        document.documentElement.classList.add("dark");
-      }
-    }
-  }, []);
+    document.documentElement.classList.toggle("dark", theme === "dark");
+  }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme = theme === "light" ? "dark" : "light";
@@ -98,7 +90,7 @@ export default function DashboardLayout({
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
       {/* Sidebar */}
-      <aside 
+      <aside
         className={clsx(
           "bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 flex flex-col z-50",
           isSidebarOpen ? "w-64" : "w-20"
@@ -114,7 +106,7 @@ export default function DashboardLayout({
             )}
           </div>
           {isSidebarOpen && (
-            <button 
+            <button
               onClick={() => setIsSidebarOpen(false)}
               className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400"
             >
@@ -132,8 +124,8 @@ export default function DashboardLayout({
                 href={item.href}
                 className={clsx(
                   "flex items-center p-3 rounded-xl transition-all group",
-                  isActive 
-                    ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400" 
+                  isActive
+                    ? "bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400"
                     : "text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 )}
               >
@@ -169,7 +161,7 @@ export default function DashboardLayout({
         <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between px-8 shrink-0">
           <div className="flex-1">
             {!isSidebarOpen && (
-              <button 
+              <button
                 onClick={() => setIsSidebarOpen(true)}
                 className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg text-gray-500 dark:text-gray-400"
               >
@@ -179,7 +171,7 @@ export default function DashboardLayout({
           </div>
           <div className="flex items-center gap-4">
             {/* Theme Toggle Button */}
-            <button 
+            <button
               onClick={toggleTheme}
               className="p-2.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl text-gray-500 dark:text-gray-400 transition-colors mr-2"
               aria-label="Changer de thème"

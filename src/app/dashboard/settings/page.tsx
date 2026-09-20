@@ -1,24 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { User, Save, LayoutDashboard, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 
+function getAdminUser(): { name?: string; email?: string } {
+  if (typeof window === "undefined") return {};
+  const stored = localStorage.getItem("adminUser");
+  if (!stored) return {};
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return {};
+  }
+}
+
 export default function SettingsPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState(() => getAdminUser().name || "");
+  const [email] = useState(() => getAdminUser().email || "");
   const [isLoading, setIsLoading] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState("30");
-
-  useEffect(() => {
-    const adminUser = localStorage.getItem("adminUser");
-    if (adminUser) {
-      const user = JSON.parse(adminUser);
-      setName(user.name || "");
-      setEmail(user.email || "");
-    }
-  }, []);
 
   const handleSave = async () => {
     setIsLoading(true);
