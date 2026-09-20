@@ -17,7 +17,8 @@ import {
   Flame,
   Star,
   Truck,
-  Store
+  Store,
+  History
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -94,6 +95,7 @@ export default function DashboardLayout({
     { label: "Revendeurs", icon: Store, href: "/dashboard/sellers" },
     { label: "Livraisons", icon: Truck, href: "/dashboard/deliveries" },
     { label: "Avis", icon: Star, href: "/dashboard/reviews" },
+    { label: "Journal d'activité", icon: History, href: "/dashboard/activity" },
     { label: "Paramètres", icon: Settings, href: "/dashboard/settings" },
   ];
 

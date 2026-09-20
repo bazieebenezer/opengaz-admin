@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Star, Trash2, MessageSquare, Store } from "lucide-react";
+import { Loader2, Star, Trash2, MessageSquare, Store, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import api from "@/lib/api";
+
+const PAGE_SIZE = 12;
 
 function getErrorMessage(error: unknown, fallback: string): string {
   return axios.isAxiosError(error) && error.response?.data?.message
@@ -24,8 +26,11 @@ interface AdminReview {
 
 export default function ReviewsPage() {
   const [reviews, setReviews] = useState<AdminReview[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [ratingFilter, setRatingFilter] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -33,9 +38,15 @@ export default function ReviewsPage() {
     (async () => {
       setIsLoading(true);
       try {
-        const response = await api.get("/admin/reviews");
+        const params = new URLSearchParams();
+        if (ratingFilter) params.set("rating", String(ratingFilter));
+        if (search) params.set("search", search);
+        params.set("page", String(page));
+        params.set("pageSize", String(PAGE_SIZE));
+        const response = await api.get(`/admin/reviews?${params.toString()}`);
         if (!active) return;
-        setReviews(response.data);
+        setReviews(response.data.items);
+        setTotal(response.data.total);
       } catch (error) {
         console.error("Failed to fetch reviews", error);
         toast.error("Impossible de charger les avis.");
@@ -46,7 +57,9 @@ export default function ReviewsPage() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [ratingFilter, search, page]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   const handleDelete = async (review: AdminReview) => {
     if (!window.confirm("Supprimer définitivement cet avis ?")) return;
@@ -62,7 +75,7 @@ export default function ReviewsPage() {
     }
   };
 
-  const filtered = ratingFilter ? reviews.filter((r) => r.rating === ratingFilter) : reviews;
+  const filtered = reviews;
   const average = reviews.length > 0 ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length : 0;
 
   return (
@@ -95,7 +108,17 @@ export default function ReviewsPage() {
             {rating} <Star className="w-3.5 h-3.5 fill-current" />
           </button>
         ))}
-        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">{filtered.length} avis</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">{total} avis</span>
+      </div>
+
+      <div className="relative md:hidden">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <input
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+          placeholder="Rechercher par produit, client..."
+          className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none"
+        />
       </div>
 
       {isLoading ? (
@@ -152,6 +175,28 @@ export default function ReviewsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="p-2 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span className="text-sm text-gray-500 dark:text-gray-400 px-2">
+            Page {page} / {totalPages}
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="p-2 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       )}
     </div>

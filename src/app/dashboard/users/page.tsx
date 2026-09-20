@@ -1,10 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users as UsersIcon, Loader2, Search, Shield, ShieldOff, Trash2, Mail, Phone, Clock } from "lucide-react";
+import { Users as UsersIcon, Loader2, Search, Shield, ShieldOff, Trash2, Mail, Phone, Clock, FileDown, BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import api from "@/lib/api";
+import { downloadCsv } from "@/lib/export";
+
+const PAGE_SIZE = 20;
 
 function getErrorMessage(error: unknown, fallback: string): string {
   return axios.isAxiosError(error) && error.response?.data?.message
@@ -41,6 +44,8 @@ interface AdminUser {
 
 export default function UsersPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
@@ -54,10 +59,13 @@ export default function UsersPage() {
         const params = new URLSearchParams();
         if (search) params.set("search", search);
         if (roleFilter !== "ALL") params.set("role", roleFilter);
+        params.set("page", String(page));
+        params.set("pageSize", String(PAGE_SIZE));
         const query = params.toString() ? `?${params.toString()}` : "";
         const response = await api.get(`/admin/users${query}`);
         if (!active) return;
-        setUsers(response.data);
+        setUsers(response.data.items);
+        setTotal(response.data.total);
       } catch (error) {
         console.error("Failed to fetch users", error);
         toast.error("Impossible de charger les utilisateurs.");
@@ -68,7 +76,22 @@ export default function UsersPage() {
     return () => {
       active = false;
     };
-  }, [search, roleFilter]);
+  }, [search, roleFilter, page]);
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  const handleValidate = async (user: AdminUser) => {
+    setProcessingId(user.id);
+    try {
+      const response = await api.post(`/admin/validate-user/${user.id}`, { action: "APPROVE" });
+      toast.success(response.data.message || "Compte validé.");
+      setUsers((prev) => prev.map((u) => (u.id === user.id ? { ...u, isValidated: true } : u)));
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Erreur lors de la validation."));
+    } finally {
+      setProcessingId(null);
+    }
+  };
 
   const handleToggleBlock = async (user: AdminUser) => {
     setProcessingId(user.id);
@@ -104,10 +127,18 @@ export default function UsersPage() {
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Gestion des utilisateurs</h1>
           <p className="text-gray-500 dark:text-gray-400">Recherchez, filtrez et gérez tous les comptes de la plateforme</p>
         </div>
-        <div className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300">
+        <div className="flex items-center gap-3 text-sm font-medium text-gray-600 dark:text-gray-300">
+        <span className="flex items-center gap-2">
           <UsersIcon className="w-4 h-4" />
-          {users.length} utilisateur(s)
-        </div>
+          {total} utilisateur(s)
+        </span>
+        <button
+          onClick={() => downloadCsv("/admin/export/users", "utilisateurs.csv")}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:border-blue-300 hover:text-blue-600 transition-colors cursor-pointer"
+        >
+          <FileDown className="w-4 h-4" /> Exporter CSV
+        </button>
+      </div>
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
@@ -202,6 +233,16 @@ export default function UsersPage() {
                       <div className="flex items-center justify-end gap-2">
                         {user.role !== "ADMIN" && (
                           <>
+                            {!user.isValidated && (
+                              <button
+                                onClick={() => handleValidate(user)}
+                                disabled={processingId === user.id}
+                                title="Valider le compte"
+                                className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 transition-colors cursor-pointer disabled:opacity-50"
+                              >
+                                {processingId === user.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <BadgeCheck className="h-4 w-4" />}
+                              </button>
+                            )}
                             <button
                               onClick={() => handleToggleBlock(user)}
                               disabled={processingId === user.id}
@@ -232,6 +273,28 @@ export default function UsersPage() {
             </table>
           </div>
         )}
+      </div>
+
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          {users.length > 0 ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, total)} sur ${total}` : "0 résultat"}
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="p-2 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page >= totalPages}
+            className="p-2 rounded-lg border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </div>
   );
