@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users as UsersIcon, Loader2, Search, Shield, ShieldOff, Trash2, Mail, Phone, Clock, FileDown, BadgeCheck, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users as UsersIcon, Loader2, Search, Shield, ShieldOff, Trash2, Mail, Phone, Clock, FileDown, BadgeCheck, ChevronLeft, ChevronRight, X } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import api from "@/lib/api";
@@ -37,6 +37,8 @@ interface AdminUser {
   role: string;
   shopName: string | null;
   isShopOpen: boolean;
+  cnibRecto: string | null;
+  cnibVerso: string | null;
   isValidated: boolean;
   isBlocked: boolean;
   createdAt: string;
@@ -50,6 +52,8 @@ export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [processingId, setProcessingId] = useState<string | null>(null);
+  const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
+  const [detailUserId, setDetailUserId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -186,7 +190,11 @@ export default function UsersPage() {
               </thead>
               <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                 {users.map((user) => (
-                  <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                  <tr
+                    key={user.id}
+                    onClick={() => setDetailUser(user)}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+                  >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 flex items-center justify-center font-bold text-gray-500 dark:text-gray-400 text-xs shrink-0">
@@ -296,6 +304,82 @@ export default function UsersPage() {
           </button>
         </div>
       </div>
+
+      {detailUser && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 dark:bg-black/70"
+          onClick={() => setDetailUser(null)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 w-full max-w-2xl rounded-2xl shadow-2xl border border-neutral-200 dark:border-gray-800 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                  {detailUser.name || detailUser.email}
+                </h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {roleLabels[detailUser.role] || detailUser.role}
+                  {detailUser.shopName ? ` • ${detailUser.shopName}` : ""}
+                </p>
+              </div>
+              <button
+                onClick={() => setDetailUser(null)}
+                className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer transition-colors"
+                aria-label="Fermer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                  <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Email</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-200 break-all">{detailUser.email}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-100 dark:border-gray-800">
+                  <p className="text-xs font-semibold text-gray-400 uppercase mb-1">Téléphone</p>
+                  <p className="text-sm text-gray-800 dark:text-gray-200">{detailUser.phone || "—"}</p>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Pièce d&apos;identité (CNIB)</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Recto</p>
+                    {detailUser.cnibRecto ? (
+                      <img
+                        src={detailUser.cnibRecto}
+                        alt="CNIB recto"
+                        referrerPolicy="no-referrer"
+                        className="w-full max-h-64 object-contain rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                      />
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">Aucune photo.</p>
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mb-1.5">Verso</p>
+                    {detailUser.cnibVerso ? (
+                      <img
+                        src={detailUser.cnibVerso}
+                        alt="CNIB verso"
+                        referrerPolicy="no-referrer"
+                        className="w-full max-h-64 object-contain rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                      />
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">Aucune photo.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
