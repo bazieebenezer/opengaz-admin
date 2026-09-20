@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users as UsersIcon, Loader2, Search, Shield, ShieldOff, Trash2, Mail, Phone, Clock, FileDown, BadgeCheck, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Users as UsersIcon, Loader2, Search, Shield, ShieldOff, Trash2, Mail, Phone, Clock, FileDown, BadgeCheck, ChevronLeft, ChevronRight, X, Download } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import api from "@/lib/api";
@@ -53,6 +53,7 @@ export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [processingId, setProcessingId] = useState<string | null>(null);
   const [detailUser, setDetailUser] = useState<AdminUser | null>(null);
+  const [zoomImage, setZoomImage] = useState<string | null>(null);
   const [detailUserId, setDetailUserId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -355,7 +356,8 @@ export default function UsersPage() {
                         src={detailUser.cnibRecto}
                         alt="CNIB recto"
                         referrerPolicy="no-referrer"
-                        className="w-full max-h-64 object-contain rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700"
+                        onClick={() => setZoomImage(detailUser.cnibRecto)}
+                        className="w-full max-h-64 object-contain rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 cursor-zoom-in hover:opacity-90 transition-opacity"
                       />
                     ) : (
                       <p className="text-xs text-gray-400 italic">Aucune photo.</p>
